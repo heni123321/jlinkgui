@@ -1,0 +1,14 @@
+*.class
+
+# Package Files #
+*.war
+*.ear
+target
+.classpath
+.project
+.settings
+.gradle
+build
+/bin
+/.nb-gradle/private/
+/build/
