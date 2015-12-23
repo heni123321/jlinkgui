@@ -62,7 +62,7 @@ public class Main extends Application {
         int hitht = 100;
         int with = 100;
         setup();
-        jlink = new File(System.getProperty("java.home"), "bin\\jlink" + exeformat);
+        jlink = new File(System.getProperty("java.home"), "bin" + File.separator + "jlink" + exeformat);
         Button mlib = new Button("mlib");
         mlib.setMinHeight(hitht);
         mlib.setMinWidth(with);
