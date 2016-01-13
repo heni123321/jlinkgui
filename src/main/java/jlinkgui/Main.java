@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.module.ModuleFinder;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -52,6 +56,8 @@ public class Main extends Application {
         String osname = System.getProperty("os.name");
         if (osname.contains("Windows")) {
             exeformat = ".exe";
+        } else if (osname.contains("OSX")) {
+            exeformat = ".dmg";
         } else {
             exeformat = "";
         }
@@ -160,6 +166,7 @@ public class Main extends Application {
 
     private List<Item> parcestrings(List<String> moduleNames) {
         List<Item> items = new ArrayList<>();
+        moduleNames.sort(null);
         for (String name : moduleNames) {
             Item currentItem = null;
             if (!name.contains(".")) {
@@ -247,7 +254,7 @@ public class Main extends Application {
                 pb.directory(new File(System.getProperty("user.dir")));
                 pb.redirectErrorStream(true);
                 Process p = pb.start();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("utf-8")));
                 StringBuilder builder = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
@@ -257,14 +264,17 @@ public class Main extends Application {
                 s.close();
                 outputprop.set(builder.toString());
             } catch (Exception e) {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                e.printStackTrace();
-                this.outputprop.set(e.getMessage());
+                this.outputprop.set(e.getMessage()+ System.getProperty("line.separator") + collectStackTraces(e));
             }
 
         });
     }
 
+    private String collectStackTraces(Throwable throwable) {
+        Writer writer = new StringWriter(1024);
+        PrintWriter printWriter = new PrintWriter(writer);
+        throwable.printStackTrace(printWriter);
+        printWriter.write(System.getProperty("line.separator"));
+        return writer.toString();
+    }
 }
