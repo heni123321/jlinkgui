@@ -10,6 +10,7 @@ import java.io.Writer;
 import java.lang.module.ModuleFinder;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,16 +41,16 @@ import javafx.scene.layout.VBox;
 
 public class Main extends Application {
     private static final String exeformat;
-    private File jlink;
-    private File output;
+    private String jlink;
+    private Path output;
     private TreeItem<String> jmods;
     private Set<Path> mlibs = new HashSet<>();
     private DirectoryChooser outputChooser;
     private DirectoryChooser mlibChooser;
-    private String compression;
     private ComboBox<String> comboBox;
     private StringProperty outputprop = new SimpleStringProperty(this, "output");
     private TreeView<String> tv;
+	private boolean cfn;
     private static final String DOTSPLIT = Pattern.quote(".");
 
     static {
@@ -68,29 +69,31 @@ public class Main extends Application {
         int hitht = 100;
         int with = 100;
         setup();
-        jlink = new File(System.getProperty("java.home"), "bin" + File.separator + "jlink" + exeformat);
+        jlink = System.getProperty("java.home") + File.separator + "bin" + File.separator + "jlink" + exeformat;
         Button mlib = new Button("mlib");
         mlib.setMinHeight(hitht);
         mlib.setMinWidth(with);
         mlib.setOnAction(e -> {
-            Path path = mlibChooser.showDialog(mainStage).toPath();
+            File showDialog = mlibChooser.showDialog(mainStage);
+            if (showDialog == null) {
+				return;
+			}
+			Path path = showDialog.toPath();
             calculateModules(path);
             mlibs.add(path);
         });
         Button output = new Button("output");
         output.setMinHeight(hitht);
         output.setMinWidth(with);
-        output.setOnAction(e -> this.output = outputChooser.showDialog(mainStage));
+        output.setOnAction(e -> this.output = outputChooser.showDialog(mainStage).toPath());
         comboBox = new ComboBox<>();
         comboBox.setDisable(true);
         comboBox.getItems().addAll("0", "1", "2");
-        CheckBox box = new CheckBox("compression");
-        box.setOnAction(e -> {
-            if (box.isSelected()) {
-                compression = "on";
+        CheckBox compresion = new CheckBox("compression");
+        compresion.setOnAction(e -> {
+            if (compresion.isSelected()) {
                 comboBox.setDisable(false);
             } else {
-                compression = "off";
                 comboBox.setDisable(true);
             }
         });
@@ -119,7 +122,11 @@ public class Main extends Application {
         bottens.getChildren().addAll(mlib, output, link);
         HBox hb = new HBox();
         VBox vb = new VBox();
-        hb.getChildren().addAll(bottens, tv, box, comboBox);
+        VBox options = new VBox(new HBox(compresion, comboBox));
+        CheckBox cfn = new CheckBox("class-for-name");
+        cfn.setOnAction(e -> this.cfn = cfn.isSelected());
+        options.getChildren().add(cfn);
+        hb.getChildren().addAll(bottens, tv, options);
         vb.getChildren().addAll(hb, l);
         Scene scene = new Scene(vb);
         mainStage.setScene(scene);
@@ -203,23 +210,28 @@ public class Main extends Application {
 
     private List<String> getargs() {
         List<String> l = new ArrayList<>();
-        l.add(jlink.toString());
-        l.add("--modulepath");
+        l.add(jlink);
+        l.add("--module-path");
         l.add(mlibs.stream().map(Path::toString).collect(Collectors.joining(";")));
-        l.add("--addmods");
+        l.add("--add-modules");
         if (tv.getSelectionModel().getSelectedItems().size() == 1) {
             l.add(tv.getSelectionModel().getSelectedItems().get(0).getValue());
         } else {
             l.add(tv.getSelectionModel().getSelectedItems().stream().map(TreeItem::getValue).collect(Collectors.joining(",")));
         }
         l.add("--output");
+        try {
+			Files.delete(output);
+		} catch (IOException e) {
+		}
         l.add(output.toString());
-        l.add("--compress-resources");
-        l.add(compression);
         if (!comboBox.isDisable()) {
-            l.add("--compress-resources-level");
+            l.add("--compress");
             l.add(comboBox.getValue());
         }
+        if (cfn) {
+			l.add("--class-for-name");
+		}
         return l;
     }
 
