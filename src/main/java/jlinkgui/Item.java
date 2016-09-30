@@ -34,7 +34,8 @@ public class Item implements Comparable<Item> {
         return isModule;
     }
 
-    public String getFullName() {
+    @Override
+    public String toString() {
         Item current = this;
         String tempStr = current.getName();
         while (current.parent != null) {
@@ -42,11 +43,6 @@ public class Item implements Comparable<Item> {
             current = current.parent;
         }
         return tempStr;
-    }
-
-    @Override
-    public String toString() {
-        return getFullName();
     }
 
     @Override
@@ -92,7 +88,7 @@ public class Item implements Comparable<Item> {
         } else if (!isModule && !arg0.isModule) {
             return getName().compareTo(arg0.getName());
         } else {
-            return getFullName().compareTo(arg0.getFullName());
+            return toString().compareTo(arg0.toString());
         }
     }
 

@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.module.ModuleFinder;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +27,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -66,9 +69,21 @@ public class Main extends Application {
 
     @Override
     public void start(Stage mainStage) {
+    	Controler.stage = mainStage;
+    	Parent root = null;
+		try {
+			URL url = getClass().getResource("/seen.fxml");
+			root = FXMLLoader.load(url);
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+        
+    	mainStage.setTitle("FXML Welcome");
+    	mainStage.setScene(new Scene(root, 300, 275));
+    	mainStage.show();
+    	if (false) {
         int hitht = 100;
         int with = 100;
-        setup();
         jlink = System.getProperty("java.home") + File.separator + "bin" + File.separator + "jlink" + exeformat;
         Button mlib = new Button("mlib");
         mlib.setMinHeight(hitht);
@@ -131,6 +146,7 @@ public class Main extends Application {
         Scene scene = new Scene(vb);
         mainStage.setScene(scene);
         mainStage.show();
+    	}
     }
 
     private void calculateModules(Path path) {
@@ -153,12 +169,12 @@ public class Main extends Application {
 
     private void fillsubtree(List<Item> items, TreeItem<String> titem, Item module) {
         if (module != null) {
-            titem.getChildren().add(new TreeItem<String>(module.getFullName()));
+            titem.getChildren().add(new TreeItem<String>(module.toString()));
         }
         Collections.sort(items);
         for (Item item : items) {
             if (item.getChildrens().size() == 0) {
-                titem.getChildren().add(new TreeItem<String>(item.getFullName()));
+                titem.getChildren().add(new TreeItem<String>(item.toString()));
             } else {
                 TreeItem<String> ti = new TreeItem<String>(item.getName());
                 titem.getChildren().add(ti);
@@ -233,17 +249,6 @@ public class Main extends Application {
 			l.add("--class-for-name");
 		}
         return l;
-    }
-
-    private void setup() {
-        DirectoryChooser dc = new DirectoryChooser();
-        dc.setTitle("Output");
-        dc.setInitialDirectory(new File(System.getProperty("user.dir")));
-        outputChooser = dc;
-        DirectoryChooser dc1 = new DirectoryChooser();
-        dc1.setTitle("Output");
-        dc1.setInitialDirectory(new File(System.getProperty("java.home")));
-        mlibChooser = dc1;
     }
 
     public static void main(String[] args) {
