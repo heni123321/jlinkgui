@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 
 import java.io.BufferedReader;
@@ -34,9 +35,11 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.scene.control.ChoiceBox;
 
 public class Controler {
 
+    @FXML
 	private TreeView<String> tv;
 	private DirectoryChooser outputChooser;
     private DirectoryChooser mlibChooser;
@@ -51,11 +54,20 @@ public class Controler {
     private ComboBox<String> comboBox;
     @FXML
     private Label l;
+    @FXML
+    private ChoiceBox<String> compression;
 
-    public Controler() {
+
+    @FXML
+    void initialize() {
     	this.jmods = new TreeItem<>();
     	setup();
-	}
+    	compression.getItems().addAll("0", "1", "2");
+    	tv.setShowRoot(false);
+    	tv.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	tv.setRoot(jmods);
+    }
+
     
 	public void addlib() {
 		File showDialog = mlibChooser.showDialog(stage);
