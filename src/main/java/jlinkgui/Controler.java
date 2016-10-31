@@ -1,7 +1,6 @@
 package jlinkgui;
 
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
@@ -19,14 +18,17 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.spi.ToolProvider;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.event.ActionEvent;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -35,6 +37,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 
 public class Controler {
@@ -46,7 +49,7 @@ public class Controler {
 	private TreeItem<String> jmods;
 	public static Stage stage;
     private Set<Path> mlibs = new HashSet<>();
-    private String jlink;
+    private ToolProvider jlink = ToolProvider.findFirst("jlink").orElseThrow(() -> new RuntimeException("jlink not found"));
     private StringProperty outputprop = new SimpleStringProperty(this, "output");
 	private boolean cfn;
     private Path output;
@@ -56,16 +59,20 @@ public class Controler {
     private Label l;
     @FXML
     private ChoiceBox<String> compression;
+    @FXML
+    private CheckBox c;
+    @FXML
+    private CheckBox cl;
 
 
     @FXML
     void initialize() {
     	this.jmods = new TreeItem<>();
     	setup();
-    	compression.getItems().addAll("0", "1", "2");
     	tv.setShowRoot(false);
     	tv.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	tv.setRoot(jmods);
+        l.textProperty().bind(outputprop);
     }
 
     
@@ -92,7 +99,17 @@ public class Controler {
             l.setText(e1.toString() + "\n" + collect);
         }
 	}
+	
+	 @FXML
+	 void compresion(ActionEvent event) {
+		 compression.setDisable(c.isPressed());
+	 }
 
+	 @FXML
+	 void cfnm(ActionEvent event) {
+		 cfn = cl.isSelected();
+	 }
+	 
 	private void calculateModules(Path path) {
 		if (mlibs.contains(path)) {
 			return;
@@ -181,21 +198,10 @@ public class Controler {
 		dc1.setTitle("Output");
 		dc1.setInitialDirectory(new File(System.getProperty("java.home")));
 		mlibChooser = dc1;
-		String exeformat;
-		 String osname = System.getProperty("os.name");
-	        if (osname.contains("Windows")) {
-	            exeformat = ".exe";
-	        } else if (osname.contains("OSX")) {
-	            exeformat = ".dmg";
-	        } else {
-	            exeformat = "";
-	        }
-        jlink = System.getProperty("java.home") + File.separator + "bin" + File.separator + "jlink" + exeformat;
 	}
 	
 	private List<String> getargs() {
         List<String> l = new ArrayList<>();
-        l.add(jlink);
         l.add("--module-path");
         l.add(mlibs.stream().map(Path::toString).collect(Collectors.joining(";")));
         l.add("--add-modules");
@@ -232,19 +238,11 @@ public class Controler {
         s.show();
         Platform.runLater(() -> {
             try {
-                ProcessBuilder pb = new ProcessBuilder(list);
-                pb.directory(new File(System.getProperty("user.dir")));
-                pb.redirectErrorStream(true);
-                Process p = pb.start();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.forName("utf-8")));
-                StringBuilder builder = new StringBuilder();
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line);
-                    builder.append(System.getProperty("line.separator"));
-                }
+            	StringWriter writer = new StringWriter();
+            	PrintWriter pw = new PrintWriter(writer);
+            	jlink.run(pw, pw, list.toArray(new String[0]));
                 s.close();
-                outputprop.set(builder.toString());
+                outputprop.set(pw.toString());
             } catch (Exception e) {
                 this.outputprop.set(e.getMessage()+ System.getProperty("line.separator") + collectStackTraces(e));
             }

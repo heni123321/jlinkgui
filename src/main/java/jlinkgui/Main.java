@@ -79,7 +79,7 @@ public class Main extends Application {
 		}
         
     	mainStage.setTitle("FXML Welcome");
-    	mainStage.setScene(new Scene(root, 300, 275));
+    	mainStage.setScene(new Scene(root));
     	mainStage.show();
     	if (false) {
         int hitht = 100;

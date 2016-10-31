@@ -7,11 +7,11 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<GridPane prefHeight="401.0" prefWidth="689.0003220703074" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="jlinkgui.Controler">
+<GridPane prefHeight="-1.0" prefWidth="689.0003220703074" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="jlinkgui.Controler">
   <children>
     <GridPane GridPane.columnIndex="0" GridPane.rowIndex="0">
       <children>
-        <TreeView fx:id="tv" prefHeight="298.0" prefWidth="313.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <TreeView fx:id="tv" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
         <GridPane GridPane.columnIndex="0" GridPane.rowIndex="0">
           <children>
             <Button id="add" mnemonicParsing="false" onAction="#addlib" prefHeight="361.0" prefWidth="493.0" text="mlib" GridPane.columnIndex="0" GridPane.rowIndex="0" />
@@ -27,40 +27,21 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           </rowConstraints>
         </GridPane>
-        <GridPane prefHeight="72.0" prefWidth="132.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
           <children>
-            <GridPane GridPane.columnIndex="0" GridPane.rowIndex="0">
-              <children>
-                <CheckBox mnemonicParsing="false" prefHeight="115.0" prefWidth="239.0" text="compression" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <ChoiceBox fx:id="compression" disable="true" prefHeight="200.0" prefWidth="439.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                  <items>
-                    <FXCollections fx:factory="observableArrayList">
-                      <String fx:value="Item 1" />
-                      <String fx:value="Item 2" />
-                      <String fx:value="Item 3" />
-                    </FXCollections>
-                  </items>
-                </ChoiceBox>
-              </children>
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="104.0" minWidth="10.0" prefWidth="96.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="63.0" minWidth="10.0" prefWidth="36.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-            </GridPane>
-            <CheckBox mnemonicParsing="false" prefHeight="103.0" prefWidth="267.0" text="class-for-name" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <CheckBox id="cfn" fx:id="cl" mnemonicParsing="false" text="class-for-name" />
+            <CheckBox fx:id="c" mnemonicParsing="false" onAction="#compresion" text="compression" />
+            <ChoiceBox fx:id="compression" disable="true">
+              <items>
+                <FXCollections fx:factory="observableArrayList">
+                  <String fx:value="0" />
+                  <String fx:value="1" />
+                  <String fx:value="2" />
+                </FXCollections>
+              </items>
+            </ChoiceBox>
           </children>
-          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="170.0" minWidth="10.0" prefWidth="83.0" />
-          </columnConstraints>
-          <rowConstraints>
-            <RowConstraints maxHeight="153.0" minHeight="0.0" prefHeight="39.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="265.0" minHeight="0.0" prefHeight="43.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="265.0" minHeight="10.0" prefHeight="216.0" vgrow="SOMETIMES" />
-          </rowConstraints>
-        </GridPane>
+        </VBox>
       </children>
       <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="122.0" />
