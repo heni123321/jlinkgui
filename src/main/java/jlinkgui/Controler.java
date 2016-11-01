@@ -1,21 +1,16 @@
 package jlinkgui;
 
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.module.ModuleFinder;
 import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,8 +37,7 @@ import javafx.scene.control.ChoiceBox;
 
 public class Controler {
 
-    @FXML
-	private TreeView<String> tv;
+
 	private DirectoryChooser outputChooser;
     private DirectoryChooser mlibChooser;
 	private TreeItem<String> jmods;
@@ -52,9 +46,8 @@ public class Controler {
     private ToolProvider jlink = ToolProvider.findFirst("jlink").orElseThrow(() -> new RuntimeException("jlink not found"));
     private StringProperty outputprop = new SimpleStringProperty(this, "output");
 	private boolean cfn;
+    private Stage s;
     private Path output;
-    @FXML
-    private ComboBox<String> comboBox;
     @FXML
     private Label l;
     @FXML
@@ -63,7 +56,12 @@ public class Controler {
     private CheckBox c;
     @FXML
     private CheckBox cl;
-
+    @FXML
+    private CheckBox vmb;
+    @FXML
+    private ChoiceBox<String> vm;
+    @FXML
+	private TreeView<String> tv;
 
     @FXML
     void initialize() {
@@ -73,6 +71,8 @@ public class Controler {
     	tv.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	tv.setRoot(jmods);
         l.textProperty().bind(outputprop);
+        calculateModules(Paths.get(System.getProperty("java.home"), "jmods"));
+        mlibs.add(Paths.get(System.getProperty("java.home"), "jmods"));
     }
 
     
@@ -106,8 +106,13 @@ public class Controler {
 	 }
 
 	 @FXML
-	 void cfnm(ActionEvent event) {
+	 void cfn(ActionEvent event) {
 		 cfn = cl.isSelected();
+	 }
+
+	 @FXML
+	 void vm(ActionEvent event) {
+		 vm.setDisable(vmb.isPressed());
 	 }
 	 
 	private void calculateModules(Path path) {
@@ -216,45 +221,36 @@ public class Controler {
 		} catch (IOException e) {
 		}
         l.add(output.toString());
-        if (!comboBox.isDisable()) {
+        if (!compression.isDisable()) {
             l.add("--compress");
-            l.add(comboBox.getValue());
+            l.add(compression.getValue());
         }
         if (cfn) {
 			l.add("--class-for-name");
 		}
+        if (!vm.isDisable()) {
+			l.add("--vm");
+			l.add(vm.getValue());
+		}
         return l;
     }
-
-    private Stage s;
 
     public void runprosses(List<String> list) throws IOException {
         s = new Stage();
         Label label = new Label();
-        label.setText("arbejter...");
+        label.setText("working...");
         VBox vBox = new VBox(label);
         Scene seen = new Scene(vBox, 100, 100);
         s.setScene(seen);
         s.show();
         Platform.runLater(() -> {
-            try {
-            	StringWriter writer = new StringWriter();
-            	PrintWriter pw = new PrintWriter(writer);
-            	jlink.run(pw, pw, list.toArray(new String[0]));
-                s.close();
-                outputprop.set(pw.toString());
-            } catch (Exception e) {
-                this.outputprop.set(e.getMessage()+ System.getProperty("line.separator") + collectStackTraces(e));
-            }
+        	StringWriter writer = new StringWriter();
+        	PrintWriter pw = new PrintWriter(writer);
+        	jlink.run(pw, pw, list.toArray(new String[0]));
+            s.close();
+            outputprop.set(writer.toString());
 
         });
     }
 
-    private String collectStackTraces(Throwable throwable) {
-        Writer writer = new StringWriter(1024);
-        PrintWriter printWriter = new PrintWriter(writer);
-        throwable.printStackTrace(printWriter);
-        printWriter.write(System.getProperty("line.separator"));
-        return writer.toString();
-    }
 }
