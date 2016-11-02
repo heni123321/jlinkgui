@@ -9,19 +9,24 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 
 public class Main extends Application {
-    @Override
+
+	 public static void main(String[] args) {
+	        launch(args);
+	    }
+
+	@Override
     public void start(Stage mainStage) {
     	Controler.stage = mainStage;
-    	Parent root = null;
 		try {
 			URL url = getClass().getResource("/seen.fxml");
-			root = FXMLLoader.load(url);
+			Parent root = FXMLLoader.load(url);
+			mainStage.setTitle("Jlink gui");
+	    	mainStage.setScene(new Scene(root));
+	    	mainStage.show();
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
-        
-    	mainStage.setTitle("Jlink gui");
-    	mainStage.setScene(new Scene(root));
-    	mainStage.show();
     }
+    
+    
 }

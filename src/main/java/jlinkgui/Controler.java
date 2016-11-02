@@ -91,13 +91,7 @@ public class Controler {
 	}
 	
 	public void link() {
-		try {
-            runprosses(getargs());
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            String collect = Stream.of(e1.getStackTrace()).map(Object::toString).collect(Collectors.joining("\n"));
-            l.setText(e1.toString() + "\n" + collect);
-        }
+		runprosses(getargs());
 	}
 	
 	 @FXML
@@ -235,7 +229,7 @@ public class Controler {
         return l;
     }
 
-    public void runprosses(List<String> list) throws IOException {
+    public void runprosses(List<String> list) {
         s = new Stage();
         Label label = new Label();
         label.setText("working...");
