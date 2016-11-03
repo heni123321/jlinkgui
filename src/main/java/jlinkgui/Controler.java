@@ -87,10 +87,17 @@ public class Controler {
 	}
 	
 	public void setoutput() {
-		this.output = outputChooser.showDialog(stage).toPath();
+		File file = outputChooser.showDialog(stage);
+		if (file == null) {
+			return;
+		}
+		this.output = file.toPath();
 	}
 	
 	public void link() {
+		if (output == null || tv.getSelectionModel().getSelectedItems().size() == 0) {
+			return;
+		}
 		runprosses(getargs());
 	}
 	
