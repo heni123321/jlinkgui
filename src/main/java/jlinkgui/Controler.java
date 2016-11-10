@@ -16,12 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.spi.ToolProvider;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javafx.event.ActionEvent;
 import javafx.application.Platform;
@@ -37,7 +38,6 @@ import javafx.scene.control.ChoiceBox;
 
 public class Controler {
 
-
 	private DirectoryChooser outputChooser;
     private DirectoryChooser mlibChooser;
 	private TreeItem<String> jmods;
@@ -48,6 +48,8 @@ public class Controler {
 	private boolean cfn;
     private Stage s;
     private Path output;
+    public static final Map<TreeItem<String>, Path> MAP = new HashMap<>();
+    public static final List<TreeItem<String>> MOD = new ArrayList<>();
     @FXML
     private Label l;
     @FXML
@@ -73,6 +75,7 @@ public class Controler {
         l.textProperty().bind(outputprop);
         calculateModules(Paths.get(System.getProperty("java.home"), "jmods"));
         mlibs.add(Paths.get(System.getProperty("java.home"), "jmods"));
+        tv.setCellFactory(e -> new Handler());
     }
 
     
@@ -122,6 +125,7 @@ public class Controler {
 		}
 		TreeItem<String> item = new TreeItem<>(
 				path.toString().substring(path.toString().lastIndexOf(File.separator) + 1));
+		MAP.put(item, path);
 		ModuleFinder mf = ModuleFinder.of(path);
 		try {
 			Field field = mf.getClass().getDeclaredField("isLinkPhase");
@@ -133,17 +137,22 @@ public class Controler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		MOD.add(item);
 		jmods.getChildren().add(item);
 	}
 
 	private void fillsubtree(List<Item> items, TreeItem<String> titem, Item module) {
 		if (module != null) {
-			titem.getChildren().add(new TreeItem<String>(module.toString()));
+			TreeItem<String> treeItem = new TreeItem<String>(module.toString());
+			MOD.add(treeItem);
+			titem.getChildren().add(treeItem);
 		}
 		Collections.sort(items);
 		for (Item item : items) {
 			if (item.getChildrens().size() == 0) {
-				titem.getChildren().add(new TreeItem<String>(item.toString()));
+				TreeItem<String> treeItem = new TreeItem<String>(item.toString());
+				MOD.add(treeItem);
+				titem.getChildren().add(treeItem);
 			} else {
 				TreeItem<String> ti = new TreeItem<String>(item.getName());
 				titem.getChildren().add(ti);
