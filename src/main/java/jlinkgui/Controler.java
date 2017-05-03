@@ -42,9 +42,9 @@ public class Controler {
     private DirectoryChooser mlibChooser;
     private TreeItem<String> jmods;
     public static Stage stage;
-    private Set<Path> mlibs = new HashSet<>();
-    private ToolProvider jlink = ToolProvider.findFirst("jlink").orElseThrow(() -> new RuntimeException("jlink not found"));
-    private StringProperty outputprop = new SimpleStringProperty(this, "output");
+    private final Set<Path> mlibs = new HashSet<>();
+    private final ToolProvider jlink = ToolProvider.findFirst("jlink").orElseThrow(() -> new RuntimeException("jlink not found"));
+    private final StringProperty outputprop = new SimpleStringProperty(this, "output");
     private boolean cfn;
     private Stage s;
     private Path output;
