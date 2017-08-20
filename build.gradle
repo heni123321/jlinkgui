@@ -1,7 +1,9 @@
-apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'eclipse'
 
 group = 'jlinkgui'
 version = '1.0.0-SNAPSHOT'
 archivesBaseName = 'jlinkgui'
 targetCompatibility = sourceCompatibility = '1.9'
+mainClassName = "jlinkgui.Main"
+applicationDefaultJvmArgs = ["--add-opens=java.base/jdk.internal.module=ALL-UNNAMED"]

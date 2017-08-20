@@ -97,7 +97,7 @@ public class Controler {
     }
 
     public void link() {
-        if (output == null || tv.getSelectionModel().getSelectedItems().size() == 0) {
+        if (output == null || tv.getSelectionModel().getSelectedItems().isEmpty()) {
             return;
         }
         runprosses(getargs());
@@ -131,7 +131,7 @@ public class Controler {
             field.set(mf, true);
             List<Item> items = parcestrings(mf.findAll().stream().map(mr -> mr.descriptor().name()).sorted().collect(Collectors.toList()));
             fillsubtree(items, item, null);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
             e.printStackTrace();
         }
         MOD.add(item);
@@ -140,18 +140,18 @@ public class Controler {
 
     private void fillsubtree(List<Item> items, TreeItem<String> titem, Item module) {
         if (module != null) {
-            TreeItem<String> treeItem = new TreeItem<String>(module.toString());
+            TreeItem<String> treeItem = new TreeItem<>(module.toString());
             MOD.add(treeItem);
             titem.getChildren().add(treeItem);
         }
         Collections.sort(items);
-        for (Item item : items) {
-            if (item.getChildrens().size() == 0) {
-                TreeItem<String> treeItem = new TreeItem<String>(item.toString());
+        items.forEach(item -> {
+            if (item.getChildrens().isEmpty()) {
+                TreeItem<String> treeItem = new TreeItem<>(item.toString());
                 MOD.add(treeItem);
                 titem.getChildren().add(treeItem);
             } else {
-                TreeItem<String> ti = new TreeItem<String>(item.getName());
+                TreeItem<String> ti = new TreeItem<>(item.getName());
                 titem.getChildren().add(ti);
                 if (item.isModule()) {
                     fillsubtree(item.getChildrens(), ti, item);
@@ -159,23 +159,20 @@ public class Controler {
                     fillsubtree(item.getChildrens(), ti, null);
                 }
             }
-        }
+        });
     }
 
     private List<Item> parcestrings(List<String> moduleNames) {
         List<Item> items = new ArrayList<>();
         moduleNames.sort(null);
-        for (String name : moduleNames) {
+        moduleNames.forEach(name -> {
             Item currentItem = null;
             if (!name.contains(".")) {
                 currentItem = new Item(name, 0, true);
-                if (items.contains(currentItem))
-                    continue;
-                else
+                if (!items.contains(currentItem))
                     items.add(currentItem);
             } else {
                 String[] split = name.split("\\.");
-                Item parent = null;
                 for (int i = 0; i < split.length; i++) {
                     String itemName = split[i];
                     if (i == 0) {
@@ -185,17 +182,21 @@ public class Controler {
                             items.add(currentItem);
                         }
                     } else {
-                        parent = currentItem;
-                        currentItem = parent.getChildrens().stream().filter(i2 -> i2.getName().equals(itemName)).findFirst().orElse(null);
-                        if (currentItem == null) {
-                            currentItem = new Item(itemName, i, i + 1 == split.length);
-                            currentItem.setParent(parent);
-                            parent.getChildrens().add(currentItem);
+                        Item parent = currentItem;
+                        if (parent != null) {
+                            currentItem = parent.getChildrens().stream().filter(i2 -> i2.getName().equals(itemName)).findFirst().orElse(null);
+                            if (currentItem == null) {
+                                currentItem = new Item(itemName, i, i + 1 == split.length);
+                                currentItem.setParent(parent);
+                                parent.getChildrens().add(currentItem);
+                            }
+                        } else {
                         }
+
                     }
                 }
             }
-        }
+        });
         return items;
     }
 
@@ -211,33 +212,33 @@ public class Controler {
     }
 
     private List<String> getargs() {
-        List<String> l = new ArrayList<>();
-        l.add("--module-path");
-        l.add(mlibs.stream().map(Path::toString).collect(Collectors.joining(";")));
-        l.add("--add-modules");
+        List<String> list = new ArrayList<>();
+        list.add("--module-path");
+        list.add(mlibs.stream().map(Path::toString).collect(Collectors.joining(";")));
+        list.add("--add-modules");
         if (tv.getSelectionModel().getSelectedItems().size() == 1) {
-            l.add(tv.getSelectionModel().getSelectedItems().get(0).getValue());
+            list.add(tv.getSelectionModel().getSelectedItems().get(0).getValue());
         } else {
-            l.add(tv.getSelectionModel().getSelectedItems().stream().map(TreeItem::getValue).collect(Collectors.joining(",")));
+            list.add(tv.getSelectionModel().getSelectedItems().stream().map(TreeItem::getValue).collect(Collectors.joining(",")));
         }
-        l.add("--output");
+        list.add("--output");
         try {
             Files.delete(output);
         } catch (IOException e) {
         }
-        l.add(output.toString());
+        list.add(output.toString());
         if (!compression.isDisable()) {
-            l.add("--compress");
-            l.add(compression.getValue());
+            list.add("--compress");
+            list.add(compression.getValue());
         }
         if (cfn) {
-            l.add("--class-for-name");
+            list.add("--class-for-name");
         }
         if (!vm.isDisable()) {
-            l.add("--vm");
-            l.add(vm.getValue());
+            list.add("--vm");
+            list.add(vm.getValue());
         }
-        return l;
+        return list;
     }
 
     public void runprosses(List<String> list) {
