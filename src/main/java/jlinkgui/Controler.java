@@ -38,18 +38,18 @@ import javafx.scene.control.ChoiceBox;
 
 public class Controler {
 
-    private DirectoryChooser outputChooser;
+    private static final String JAVA_HOME = System.getProperty("java.home");
+	private DirectoryChooser outputChooser;
     private DirectoryChooser mlibChooser;
     private TreeItem<String> jmods;
-    public static Stage stage;
+    static Stage stage;
     private final Set<Path> mlibs = new HashSet<>();
     private final ToolProvider jlink = ToolProvider.findFirst("jlink").orElseThrow(() -> new RuntimeException("jlink not found"));
     private final StringProperty outputprop = new SimpleStringProperty(this, "output");
     private boolean cfn;
-    private Stage s;
     private Path output;
-    public static final Map<TreeItem<String>, Path> MAP = new HashMap<>();
-    public static final List<TreeItem<String>> MOD = new ArrayList<>();
+    static final Map<TreeItem<String>, Path> MAP = new HashMap<>();
+    static final List<TreeItem<String>> MOD = new ArrayList<>();
     @FXML
     private Label l;
     @FXML
@@ -73,8 +73,8 @@ public class Controler {
         tv.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tv.setRoot(jmods);
         l.textProperty().bind(outputprop);
-        calculateModules(Paths.get(System.getProperty("java.home"), "jmods"));
-        mlibs.add(Paths.get(System.getProperty("java.home"), "jmods"));
+        calculateModules(Paths.get(JAVA_HOME, "jmods"));
+        mlibs.add(Paths.get(JAVA_HOME, "jmods"));
         tv.setCellFactory(e -> new Handler());
     }
 
@@ -132,7 +132,7 @@ public class Controler {
             List<Item> items = parcestrings(mf.findAll().stream().map(mr -> mr.descriptor().name()).sorted().collect(Collectors.toList()));
             fillsubtree(items, item, null);
         } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
-            e.printStackTrace();
+            outputprop.set(e.getMessage());
         }
         MOD.add(item);
         jmods.getChildren().add(item);
@@ -190,9 +190,7 @@ public class Controler {
                                 currentItem.setParent(parent);
                                 parent.getChildrens().add(currentItem);
                             }
-                        } else {
                         }
-
                     }
                 }
             }
@@ -207,7 +205,7 @@ public class Controler {
         outputChooser = dc;
         DirectoryChooser dc1 = new DirectoryChooser();
         dc1.setTitle("Output");
-        dc1.setInitialDirectory(new File(System.getProperty("java.home")));
+        dc1.setInitialDirectory(new File(JAVA_HOME));
         mlibChooser = dc1;
     }
 
@@ -225,6 +223,7 @@ public class Controler {
         try {
             Files.delete(output);
         } catch (IOException e) {
+        	outputprop.set(e.getMessage());
         }
         list.add(output.toString());
         if (!compression.isDisable()) {
@@ -242,8 +241,7 @@ public class Controler {
     }
 
     public void runprosses(List<String> list) {
-        System.out.println(list.stream().collect(Collectors.joining(" ")));
-        s = new Stage();
+    	Stage s = new Stage();
         Label label = new Label();
         label.setText("working...");
         VBox vBox = new VBox(label);

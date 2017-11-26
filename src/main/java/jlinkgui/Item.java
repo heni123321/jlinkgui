@@ -75,18 +75,18 @@ public class Item implements Comparable<Item> {
 
     @Override
     public int compareTo(Item arg0) {
-        if (arg0.childrens.size() > 0 && childrens.size() > 0) {
+        if (!arg0.childrens.isEmpty() && !childrens.isEmpty()) {
             return getName().compareTo(arg0.getName());
-        } else if (childrens.size() > 0) {
+        } else if (!childrens.isEmpty()) {
             return -1;
-        } else if (arg0.childrens.size() > 0) {
+        } else if (!arg0.childrens.isEmpty()) {
             return 1;
+        } else if (!isModule && !arg0.isModule) {
+            return getName().compareTo(arg0.getName());
         } else if (!isModule) {
             return -1;
         } else if (!arg0.isModule) {
             return 1;
-        } else if (!isModule && !arg0.isModule) {
-            return getName().compareTo(arg0.getName());
         } else {
             return toString().compareTo(arg0.toString());
         }

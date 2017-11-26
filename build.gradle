@@ -1,5 +1,9 @@
+plugins {
+  id "org.sonarqube" version "2.6"
+}
 apply plugin: 'application'
 apply plugin: 'eclipse'
+
 
 group = 'jlinkgui'
 version = '1.0.0-SNAPSHOT'

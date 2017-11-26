@@ -15,7 +15,7 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage mainStage) {
+    public synchronized void start(Stage mainStage) {
         Controler.stage = mainStage;
         try {
             URL url = getClass().getResource("/seen.fxml");
