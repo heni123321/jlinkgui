@@ -39,7 +39,11 @@ public class Item implements Comparable<Item> {
         Item current = this;
         String tempStr = current.getName();
         while (current.parent != null) {
-            tempStr = current.parent.name + "." + tempStr;
+            StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append(current.parent.name);
+			stringBuilder.append(".");
+			stringBuilder.append(tempStr);
+			tempStr = stringBuilder.toString();
             current = current.parent;
         }
         return tempStr;
